@@ -1,0 +1,115 @@
+/* ---------- Reset ---------- */
+*,*::before,*::after{box-sizing:border-box}
+*{margin:0}
+html,body,#root{height:100%;font-family: "Manroop",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
+img,svg,video,canvas{display:block;max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+body{-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text);line-height:1.5}
+
+/* ---------- Theme ---------- */
+:root{
+  --accent:#ff2e97; --accent-2:#ff70b9;
+  --bg:#ffffff; --text:#111111; --card:#f6f6f7; --muted:#7a7a7a; --border:#e7e7e9;
+  --ok:#17a34a; --warn:#d97706; --danger:#dc2626;
+  --shadow:0 10px 30px rgba(0,0,0,.08);
+  --radius:16px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
+}
+html[data-theme="dark"]{
+  --bg:#0b0b0c; --text:#f5f5f6; --card:#141417; --muted:#a3a3a3; --border:#242428;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+}
+html[data-theme="pink"]{
+  --bg:#fff5fb; --text:#101014; --card:#ffe5f3; --muted:#7a3d5b; --border:#ffd1e9;
+}
+
+/* ---------- Utilities ---------- */
+.container{max-width:1200px;margin:0 auto;padding:0 var(--sp-4)}
+.flex{display:flex}.grid{display:grid}
+.center{display:grid;place-items:center}
+.shadow{box-shadow:var(--shadow)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.badge{display:inline-block;padding:.25rem .5rem;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+.divider{height:1px;background:var(--border);margin:var(--sp-4) 0}
+
+/* Inputs / Buttons */
+.input,.select{width:100%;padding:.7rem 1rem;border-radius:12px;border:1px solid var(--border);background:var(--bg);transition:border-color .2s, box-shadow .2s}
+.input:focus-visible,.select:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:transform .15s ease, box-shadow .2s ease, background .2s}
+.btn.primary{background:var(--accent);border-color:transparent;color:white}
+.btn.ghost{background:transparent}
+.btn.icon{padding:.5rem}
+.btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent)}
+
+/* Pills */
+.navbar{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.navbtn{border-radius:999px;padding:.5rem .75rem;border:1px solid var(--border);background:var(--bg);transition:background .2s, border-color .2s, transform .15s}
+.navbtn:hover{transform:translateY(-1px)}
+.navbtn.active{background:var(--accent);color:#fff;border-color:transparent}
+
+/* ---------- Layout ---------- */
+.header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:saturate(1.2) blur(6px);transition:box-shadow .25s,border-color .25s}
+.header.is-scrolled{box-shadow:var(--shadow);border-color:color-mix(in srgb, var(--border) 50%, transparent)}
+.header .row{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) 0}
+.logo{display:flex;align-items:center;gap:.5rem;font-weight:800;letter-spacing:.3px}
+.logo .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
+.header .search{flex:1;display:flex;gap:var(--sp-2)}
+.header .search input{flex:1}
+.header .actions{display:flex;align-items:center;gap:var(--sp-2)}
+.main{padding:var(--sp-6) 0}
+
+/* Product grid — автоадаптация */
+.grid-products{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:var(--sp-4);
+}
+@media (max-width:1024px){.grid-products{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media (max-width:768px){
+  .header .search{display:none}
+  .grid-products{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+}
+
+/* Product card */
+.product-card{display:flex;flex-direction:column;gap:10px;padding:10px;transition:transform .2s ease, box-shadow .25s ease}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,0,0,.12)}
+.product-card .thumb{aspect-ratio:1/1;border-radius:14px;background:linear-gradient(135deg,var(--card),#fff0);border:1px solid var(--border);display:grid;place-items:center;overflow:hidden;position:relative}
+.product-card .thumb img{width:100%;height:100%;object-fit:cover;transform:scale(1);transition:transform .4s ease}
+.product-card:hover .thumb img{transform:scale(1.04)}
+.product-card .price{display:flex;align-items:baseline;gap:.35rem}
+.product-card .price .now{font-weight:800}
+.product-card .price .old{text-decoration:line-through;color:var(--muted);font-size:.9rem}
+
+/* Drawer (mobile catalog) with animation */
+.drawer{position:fixed;inset:0;z-index:1000;display:none}
+.drawer.open{display:block}
+.drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .25s}
+.drawer.open .backdrop{opacity:1}
+.drawer .panel{position:absolute;top:0;bottom:0;left:0;width:86%;max-width:360px;background:var(--bg);border-right:1px solid var(--border);padding:16px;overflow:auto;transform:translateX(-100%);transition:transform .25s ease}
+.drawer.open .panel{transform:translateX(0)}
+
+/* Breadcrumbs */
+.breadcrumbs{display:flex;flex-wrap:wrap;gap:6px;color:var(--muted);font-size:.9rem}
+.breadcrumbs a{color:var(--muted);text-decoration:underline}
+
+/* Forms */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:768px){.form-row{grid-template-columns:1fr}}
+
+/* ---------- Reveal on scroll ---------- */
+.reveal{opacity:0;transform:translateY(10px)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-anim="fade-up"].in{animation:fade-up .45s ease both}
+.reveal[data-anim="zoom-in"].in{animation:zoom-in .45s ease both}
+.reveal[data-anim="slide-left"].in{animation:slide-left .45s ease both}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes zoom-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+@keyframes slide-left{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+
+/* ---------- Motion reduce ---------- */
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
