@@ -6,7 +6,7 @@ export default function AuthDebug(){
   React.useEffect(()=>{
     (async ()=>{
       const logs: string[] = [];
-      function log(s:string){ logs.push(s); setOut(logs.join("\\n")); }
+      const log = (s:string)=>{ logs.push(s); setOut(logs.join("\\n")); };
 
       log("ENV:");
       log("  VITE_SUPABASE_URL: " + (import.meta as any).env?.VITE_SUPABASE_URL);
@@ -14,9 +14,9 @@ export default function AuthDebug(){
 
       log("\\nREST check (products head):");
       try{
-        const { error, count } = await supabase.from("products").select("id", { head:true, count: "exact" }).limit(1);
+        const { error } = await supabase.from("products").select("id", { head:true, count: "exact" }).limit(1);
         if(error) log("  error: " + error.message);
-        else log("  ok, count visible (RLS ok) ✔");
+        else log("  ok (RLS позволяет читать) ✔");
       }catch(e:any){ log("  failed: " + (e?.message||e)); }
 
       log("\\nAuth.getSession():");
@@ -28,7 +28,6 @@ export default function AuthDebug(){
 
       log("\\nHealth ping:");
       try{
-        // простой fetch к /rest/v1/ (CORS должен пускать OPTIONS/GET)
         const base = (import.meta as any).env?.VITE_SUPABASE_URL;
         const res = await fetch(base + "/rest/v1/", { method:"OPTIONS" }).catch(()=>null);
         log("  rest/v1 OPTIONS: " + (res ? res.status : "no response"));
@@ -39,7 +38,7 @@ export default function AuthDebug(){
     <div className="container" style={{padding:16}}>
       <h1>Auth Debug</h1>
       <pre className="card" style={{padding:16,whiteSpace:"pre-wrap"}}>{out}</pre>
-      <p className="muted">Если REST ок, но сессии нет — проблема в Auth (redirect/SMTP/confirm). Если REST не ок — проверь .env и CORS/URL в Studio.</p>
+      <p className="muted">Если REST ок, но сессии нет — настрой Email/Redirect. Если REST не ок — проверь .env и RLS.</p>
     </div>
   );
 }

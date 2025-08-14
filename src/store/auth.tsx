@@ -19,7 +19,6 @@ const AuthCtx = React.createContext<AuthCtxType>({
 });
 
 function sanitizeAuthUrl(to:string = "/#/account"){
-  // чистим токены Supabase из URL (фрагмент/квери)
   const hasTokens = /access_token=|refresh_token=|type=recovery/.test(location.hash + location.search);
   if (hasTokens) history.replaceState({}, "", location.origin + to);
 }
@@ -58,7 +57,7 @@ export function AuthProvider({ children }:{ children:React.ReactNode }){
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: window.location.origin + "/" } // без #!
+      options: { emailRedirectTo: window.location.origin + "/" } // БЕЗ hash!
     });
     setLoading(false);
     if(error){ console.error("[signUp]", error); throw error; }
@@ -71,7 +70,7 @@ export function AuthProvider({ children }:{ children:React.ReactNode }){
   }
   async function resetPassword(email:string){
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/"
+      redirectTo: window.location.origin + "/" // БЕЗ hash!
     });
     if(error){ console.error("[resetPassword]", error); throw error; }
   }

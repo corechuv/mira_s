@@ -14,19 +14,19 @@ function Field({ label, children }:{ label:string; children:React.ReactNode }){
 export default function AccountPage(){
   const { session, loading, recovery, signIn, signUp, signOut, resetPassword, updatePassword } = useAuth();
   const [tab,setTab] = React.useState<"profile"|"addresses"|"orders">("profile");
-  const [msg,setMsg] = React.useState("");
+  const [msg,setMsg] = React.useState(""); const [err,setErr] = React.useState("");
 
   if(!session){
     return (
       <div className="container" style={{display:"grid",gap:16}}>
         <h1>Личный кабинет</h1>
         <AuthCard
-          onSignIn={async (e,p)=>{ setMsg(""); await signIn(e,p); }}
-          onSignUp={async (e,p)=>{ await signUp(e,p); setMsg("Мы отправили письмо для подтверждения. Проверьте inbox."); }}
-          onReset={async (e)=>{ await resetPassword(e); setMsg("Ссылка для восстановления отправлена на email."); }}
+          onSignIn={async (e,p)=>{ setMsg(""); setErr(""); try{ await signIn(e,p);}catch(ex:any){ setErr(ex?.message||"Ошибка авторизации"); } }}
+          onSignUp={async (e,p)=>{ setErr(""); try{ await signUp(e,p); setMsg("Письмо подтверждения отправлено. Проверьте почту/спам."); }catch(ex:any){ setErr(ex?.message||"Ошибка регистрации"); } }}
+          onReset={async (e)=>{ setMsg(""); setErr(""); try{ await resetPassword(e); setMsg("Ссылка для восстановления отправлена на email."); }catch(ex:any){ setErr(ex?.message||"Не удалось отправить письмо"); } }}
           loading={loading}
         />
-        {msg && <div className="card" style={{padding:12,color:"var(--muted)"}}>{msg}</div>}
+        {(msg||err) && <div className="card" style={{padding:12}}><div style={{color: err ? "var(--danger)":"var(--muted)"}}>{err||msg}</div></div>}
       </div>
     );
   }
@@ -52,8 +52,8 @@ export default function AccountPage(){
             <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
               <small className="muted">Email не подтверждён — проверьте почту.</small>
               <button className="btn" onClick={async()=>{
-                const email = session.user.email; if(!email) return;
-                try{ await supabase.auth.resend({ type:"signup", email }); alert("Письмо отправлено повторно."); }
+                if(!session.user.email) return;
+                try{ await supabase.auth.resend({ type:"signup", email: session.user.email }); alert("Письмо отправлено повторно."); }
                 catch(e:any){ alert(e?.message || "Не удалось отправить письмо"); }
               }}>Отправить ещё раз</button>
             </div>

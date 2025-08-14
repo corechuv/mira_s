@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import AuthDebug from "../pages/AuthDebug";
 import Home from "../pages/Home";
 import Catalog from "../pages/Catalog";
 import Product from "../pages/Product";
@@ -29,6 +30,7 @@ export default function App(){
     { path:"/wishlist", element:<Wishlist/> },
     { path:"/compare", element:<Compare/> },
     { path:"/account", element:<Account/> },
+      { path:"/auth-debug", element:<AuthDebug/> },
     { path:"/about", element:<div className="container"><h1>О нас</h1><p>Контент-заглушка.</p></div> },
     { path:"/*", element:<NotFound/> }
   ];

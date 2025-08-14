@@ -12,7 +12,7 @@ export const supabase = createClient(url, anon, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: "pkce",              // <-- важный момент для email-ссылок/рекавери
-    debug: true                    // подробнее логирует ошибки auth в консоль
+    flowType: "pkce",  // важно для email-ссылок/восстановления
+    debug: true
   }
 });
