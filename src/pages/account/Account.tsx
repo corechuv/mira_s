@@ -1,50 +1,46 @@
 import React from "react";
 import { useAuth } from "../../store/auth";
 import { price } from "../../utils/money";
+import { supabase } from "../../api/supabase";
 import { fetchProfile, saveProfile, listAddresses, createAddress, updateAddress, deleteAddress, listOrders } from "../../api/user";
 
 function Section({ title, children }:{ title:string; children:React.ReactNode }){
-  return <section className="card" style={{padding:16,display:"grid",gap:12}}>
-    <h2>{title}</h2>
-    {children}
-  </section>;
+  return <section className="card" style={{padding:16,display:"grid",gap:12}}><h2>{title}</h2>{children}</section>;
 }
-
 function Field({ label, children }:{ label:string; children:React.ReactNode }){
-  return <label style={{display:"grid",gap:6}}>
-    <span className="muted">{label}</span>
-    {children}
-  </label>;
+  return <label style={{display:"grid",gap:6}}><span className="muted">{label}</span>{children}</label>;
 }
 
 export default function AccountPage(){
   const { session, loading, recovery, signIn, signUp, signOut, resetPassword, updatePassword } = useAuth();
   const [tab,setTab] = React.useState<"profile"|"addresses"|"orders">("profile");
-  const [msg,setMsg] = React.useState<string>("");
+  const [msg,setMsg] = React.useState("");
 
-  // ----------------- AUTH VIEW -----------------
   if(!session){
     return (
       <div className="container" style={{display:"grid",gap:16}}>
         <h1>Личный кабинет</h1>
-        <AuthCard onSignIn={async (e,p)=>{ setMsg(""); await signIn(e,p); }} onSignUp={async (e,p)=>{ setMsg("Мы отправили письмо для подтверждения почты. Проверьте inbox."); await signUp(e,p); }} onReset={async (e)=>{ await resetPassword(e); setMsg("Ссылка для восстановления отправлена на email."); }} loading={loading}/>
+        <AuthCard
+          onSignIn={async (e,p)=>{ setMsg(""); await signIn(e,p); }}
+          onSignUp={async (e,p)=>{ await signUp(e,p); setMsg("Мы отправили письмо для подтверждения. Проверьте inbox."); }}
+          onReset={async (e)=>{ await resetPassword(e); setMsg("Ссылка для восстановления отправлена на email."); }}
+          loading={loading}
+        />
         {msg && <div className="card" style={{padding:12,color:"var(--muted)"}}>{msg}</div>}
       </div>
     );
   }
 
-  // ----------------- RECOVERY VIEW -----------------
   if(recovery){
     return (
       <div className="container" style={{display:"grid",gap:16}}>
         <h1>Смена пароля</h1>
-        <PasswordReset onSubmit={async (pwd)=>{ await updatePassword(pwd); setMsg("Пароль обновлён. Можно продолжать работать."); }} loading={loading}/>
+        <PasswordReset onSubmit={async (pwd)=>{ await updatePassword(pwd); setMsg("Пароль обновлён."); }} loading={loading}/>
         {msg && <div className="card" style={{padding:12}}>{msg}</div>}
       </div>
     );
   }
 
-  // ----------------- ACCOUNT VIEW (AUTHED) -----------------
   return (
     <div className="container" style={{display:"grid",gap:16}}>
       <h1>Личный кабинет</h1>
@@ -52,7 +48,16 @@ export default function AccountPage(){
       <section className="card" style={{padding:16,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
         <div>
           <div>Вы вошли как <b>{session.user.email ?? session.user.id}</b></div>
-          {!session.user.email_confirmed_at && <small className="muted">Email не подтверждён — проверьте почту (письмо после регистрации).</small>}
+          {!session.user.email_confirmed_at && (
+            <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+              <small className="muted">Email не подтверждён — проверьте почту.</small>
+              <button className="btn" onClick={async()=>{
+                const email = session.user.email; if(!email) return;
+                try{ await supabase.auth.resend({ type:"signup", email }); alert("Письмо отправлено повторно."); }
+                catch(e:any){ alert(e?.message || "Не удалось отправить письмо"); }
+              }}>Отправить ещё раз</button>
+            </div>
+          )}
         </div>
         <button className="btn" onClick={signOut}>Выйти</button>
       </section>
@@ -70,8 +75,7 @@ export default function AccountPage(){
   );
 }
 
-/* ---------------- Components ---------------- */
-
+/* ---------- auth cards ---------- */
 function AuthCard({ onSignIn, onSignUp, onReset, loading }:{
   onSignIn:(email:string,password:string)=>Promise<void>;
   onSignUp:(email:string,password:string)=>Promise<void>;
@@ -86,21 +90,13 @@ function AuthCard({ onSignIn, onSignUp, onReset, loading }:{
   async function submit(e:React.FormEvent){
     e.preventDefault();
     setErr("");
-    try{
-      if(mode==="login") await onSignIn(email,pwd);
-      else await onSignUp(email,pwd);
-    }catch(ex:any){
-      setErr(ex?.message || "Ошибка авторизации");
-    }
+    try{ mode==="login" ? await onSignIn(email,pwd) : await onSignUp(email,pwd); }
+    catch(ex:any){ setErr(ex?.message || "Ошибка авторизации"); }
   }
   async function doReset(){
     setErr("");
-    try{
-      if(!email) throw new Error("Введите email для восстановления");
-      await onReset(email);
-    }catch(ex:any){
-      setErr(ex?.message || "Не удалось отправить письмо");
-    }
+    try{ if(!email) throw new Error("Введите email"); await onReset(email); }
+    catch(ex:any){ setErr(ex?.message || "Не удалось отправить письмо"); }
   }
 
   return (
@@ -110,12 +106,8 @@ function AuthCard({ onSignIn, onSignUp, onReset, loading }:{
         <button className={"navbtn"+(mode==="register"?" active":"")} onClick={()=>setMode("register")}>Регистрация</button>
       </div>
       <form onSubmit={submit} style={{display:"grid",gap:10}}>
-        <Field label="Email">
-          <input className="input" type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/>
-        </Field>
-        <Field label="Пароль">
-          <input className="input" type="password" required minLength={6} value={pwd} onChange={e=>setPwd(e.target.value)} placeholder="минимум 6 символов"/>
-        </Field>
+        <Field label="Email"><input className="input" type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></Field>
+        <Field label="Пароль"><input className="input" type="password" required minLength={6} value={pwd} onChange={e=>setPwd(e.target.value)} placeholder="минимум 6 символов"/></Field>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button className="btn primary" disabled={loading} type="submit">{mode==="login"?"Войти":"Создать аккаунт"}</button>
           {mode==="login" && <button type="button" className="btn" onClick={doReset}>Забыли пароль?</button>}
@@ -147,23 +139,18 @@ function PasswordReset({ onSubmit, loading }:{ onSubmit:(pwd:string)=>Promise<vo
   );
 }
 
+/* ---------- profile / addresses / orders ---------- */
 function ProfileSection(){
   const [profile, setProfile] = React.useState<{full_name?:string; phone?:string}>({});
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState("");
-  React.useEffect(()=>{
-    fetchProfile().then(p => setProfile({ full_name: p?.full_name ?? "", phone: p?.phone ?? "" })).catch(console.error);
-  },[]);
-  async function save(){
-    setBusy(true); setMsg("");
-    try{ await saveProfile(profile); setMsg("Профиль сохранён"); }catch(e:any){ setMsg(e?.message || "Ошибка"); }
-    setBusy(false);
-  }
+  React.useEffect(()=>{ fetchProfile().then(p=>setProfile({full_name:p?.full_name??"", phone:p?.phone??""})).catch(console.error); },[]);
+  async function save(){ setBusy(true); setMsg(""); try{ await saveProfile(profile); setMsg("Профиль сохранён"); }catch(e:any){ setMsg(e?.message||"Ошибка"); } setBusy(false); }
   return (
     <Section title="Профиль">
       <div className="form-row">
-        <Field label="Имя"><input className="input" value={profile.full_name || ""} onChange={e=>setProfile({...profile, full_name:e.target.value})}/></Field>
-        <Field label="Телефон"><input className="input" value={profile.phone || ""} onChange={e=>setProfile({...profile, phone:e.target.value})}/></Field>
+        <Field label="Имя"><input className="input" value={profile.full_name||""} onChange={e=>setProfile({...profile, full_name:e.target.value})}/></Field>
+        <Field label="Телефон"><input className="input" value={profile.phone||""} onChange={e=>setProfile({...profile, phone:e.target.value})}/></Field>
       </div>
       <div><button className="btn primary" onClick={save} disabled={busy}>Сохранить</button> {msg && <small className="muted" style={{marginLeft:8}}>{msg}</small>}</div>
     </Section>
@@ -175,20 +162,11 @@ function AddressesSection(){
   const [list, setList] = React.useState<any[]>([]);
   const [form, setForm] = React.useState<any>(empty);
   const [msg,setMsg] = React.useState("");
-
   async function load(){ setList(await listAddresses()); }
   React.useEffect(()=>{ load().catch(console.error); },[]);
-
-  async function add(){
-    await createAddress(form); setForm(empty); setMsg("Адрес добавлен"); await load();
-  }
-  async function upd(id:string, patch:any){
-    await updateAddress(id, patch); setMsg("Сохранено"); await load();
-  }
-  async function del(id:string){
-    await deleteAddress(id); setMsg("Удалено"); await load();
-  }
-
+  async function add(){ await createAddress(form); setForm(empty); setMsg("Адрес добавлен"); await load(); }
+  async function upd(id:string, patch:any){ await updateAddress(id, patch); setMsg("Сохранено"); await load(); }
+  async function del(id:string){ await deleteAddress(id); setMsg("Удалено"); await load(); }
   return (
     <>
       <Section title="Новый адрес">
@@ -201,10 +179,8 @@ function AddressesSection(){
           <Field label="Улица"><input className="input" value={form.street} onChange={e=>setForm({...form, street:e.target.value})}/></Field>
         </div>
         <Field label="Дом / Кв"><input className="input" value={form.house} onChange={e=>setForm({...form, house:e.target.value})}/></Field>
-        <button className="btn primary" onClick={add}>Добавить адрес</button>
-        {msg && <small className="muted">{msg}</small>}
+        <button className="btn primary" onClick={add}>Добавить адрес</button> {msg && <small className="muted">{msg}</small>}
       </Section>
-
       <Section title="Сохранённые адреса">
         {!list.length && <p className="muted">Пока пусто.</p>}
         <div style={{display:"grid",gap:8}}>
