@@ -75,7 +75,6 @@ export default function AccountPage(){
   );
 }
 
-/* ---------- auth cards ---------- */
 function AuthCard({ onSignIn, onSignUp, onReset, loading }:{
   onSignIn:(email:string,password:string)=>Promise<void>;
   onSignUp:(email:string,password:string)=>Promise<void>;
@@ -139,7 +138,6 @@ function PasswordReset({ onSubmit, loading }:{ onSubmit:(pwd:string)=>Promise<vo
   );
 }
 
-/* ---------- profile / addresses / orders ---------- */
 function ProfileSection(){
   const [profile, setProfile] = React.useState<{full_name?:string; phone?:string}>({});
   const [busy, setBusy] = React.useState(false);

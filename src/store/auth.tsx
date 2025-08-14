@@ -57,7 +57,7 @@ export function AuthProvider({ children }:{ children:React.ReactNode }){
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: window.location.origin + "/" } // БЕЗ hash!
+      options: { emailRedirectTo: window.location.origin + "/" } // БЕЗ hash
     });
     setLoading(false);
     if(error){ console.error("[signUp]", error); throw error; }
@@ -70,7 +70,7 @@ export function AuthProvider({ children }:{ children:React.ReactNode }){
   }
   async function resetPassword(email:string){
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/" // БЕЗ hash!
+      redirectTo: window.location.origin + "/" // БЕЗ hash
     });
     if(error){ console.error("[resetPassword]", error); throw error; }
   }
