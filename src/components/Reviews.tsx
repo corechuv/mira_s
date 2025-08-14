@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "../store/auth";
-import { listReviews, getMyReview, upsertMyReview, deleteMyReview, Review } from "../api/reviews";
+import { listReviews, getMyReview, upsertMyReview, deleteMyReview, fetchProductStats } from "../api/reviews";
+import type { Review } from "../api/reviews";
 
 function Stars({ value, onChange, size=20, interactive=false }:{
   value:number; onChange?:(v:number)=>void; size?:number; interactive?:boolean;
@@ -24,7 +25,7 @@ function Stars({ value, onChange, size=20, interactive=false }:{
   );
 }
 
-export default function Reviews({ productId, avg, count }:{ productId:string; avg:number; count:number }){
+export default function Reviews({ productId }:{ productId:string }){
   const { session } = useAuth();
   const [list, setList] = React.useState<Review[]>([]);
   const [my, setMy] = React.useState<Review|null>(null);
@@ -32,27 +33,36 @@ export default function Reviews({ productId, avg, count }:{ productId:string; av
   const [text, setText] = React.useState<string>("");
   const [busy, setBusy] = React.useState(false);
   const [msg, setMsg] = React.useState("");
+  const [avg, setAvg] = React.useState(0);
+  const [count, setCount] = React.useState(0);
 
-  async function load(){
-    const [r, mine] = await Promise.all([listReviews(productId, 0, 20), getMyReview(productId)]);
-    setList(r); setMy(mine||null);
-    if(mine){ setRating(mine.rating); setText(mine.body||""); }
+  async function loadAll(){
+    const [r, mine, stats] = await Promise.all([
+      listReviews(productId, 0, 20),
+      getMyReview(productId),
+      fetchProductStats(productId)
+    ]);
+    setList(r);
+    setMy(mine||null);
+    if(mine){ setRating(mine.rating); setText(mine.body||""); } else { setRating(5); setText(""); }
+    setAvg(stats.rating||0);
+    setCount(stats.rating_count||0);
   }
-  React.useEffect(()=>{ load().catch(console.error); },[productId]);
+  React.useEffect(()=>{ loadAll().catch(console.error); },[productId]);
 
   async function submit(){
     setBusy(true); setMsg("");
     try{
       await upsertMyReview(productId, rating, text.trim());
       setMsg("Отзыв сохранён");
-      await load();
+      await loadAll();
     }catch(e:any){ setMsg(e?.message || "Не удалось сохранить отзыв"); }
     setBusy(false);
   }
   async function remove(){
     if(!my) return;
     setBusy(true); setMsg("");
-    try{ await deleteMyReview(my.id); setMsg("Отзыв удалён"); await load(); }
+    try{ await deleteMyReview(my.id); setMsg("Отзыв удалён"); await loadAll(); }
     catch(e:any){ setMsg(e?.message || "Не удалось удалить"); }
     setBusy(false);
   }

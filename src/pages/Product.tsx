@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter, Link } from "../router";
 import Breadcrumbs from "../components/Breadcrumbs";
+import Reviews from "../components/Reviews";
 import { Icon } from "../icons/Icon";
 import { useCart, useViewed, useWishlist, useCompare } from "../store/store";
 import { price } from "../utils/money";

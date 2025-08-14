@@ -4,7 +4,7 @@ export type Review = {
   id: string; product_id: string; user_id: string;
   rating: number; body: string | null;
   is_public: boolean; created_at: string; updated_at: string;
-  full_name?: string | null; avatar_url?: string | null; // из reviews_view
+  full_name?: string | null; avatar_url?: string | null;
 };
 
 export async function listReviews(productId: string, from = 0, size = 20): Promise<Review[]>{
@@ -34,7 +34,6 @@ export async function getMyReview(productId: string): Promise<Review | null>{
 export async function upsertMyReview(productId: string, rating: number, body: string){
   const { data: { user } } = await supabase.auth.getUser();
   if(!user) throw new Error("Not authenticated");
-  // upsert по (product_id, user_id)
   const { error } = await supabase
     .from("reviews")
     .upsert({ product_id: productId, user_id: user.id, rating, body }, { onConflict: "product_id,user_id" });
@@ -49,4 +48,14 @@ export async function deleteMyReview(reviewId: string){
     .delete()
     .eq("id", reviewId);
   if(error) throw error;
+}
+
+export async function fetchProductStats(productId: string): Promise<{ rating:number; rating_count:number }>{
+  const { data, error } = await supabase
+    .from("products")
+    .select("rating, rating_count")
+    .eq("id", productId)
+    .maybeSingle();
+  if(error) throw error;
+  return { rating: data?.rating ?? 0, rating_count: data?.rating_count ?? 0 };
 }
