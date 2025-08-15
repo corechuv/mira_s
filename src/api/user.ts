@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-export type Profile = { id: string; full_name?: string|null; avatar_url?: string|null; phone?: string|null };
+export type Profile = { id: string; full_name?: string|null; avatar_url?: string|null; phone?: string|null; };
 export type Address = { id: string; country?: string|null; city?: string|null; zip?: string|null; street?: string|null; house?: string|null };
 export type Order = { id: string; total: number; status: string; created_at: string };
 

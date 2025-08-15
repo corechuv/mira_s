@@ -4,7 +4,7 @@ import { Icon } from "../icons/Icon";
 
 export default function Footer(){
   return (
-    <footer className="container" style={{padding:"28px 0",borderTop:"1px solid var(--border)",marginTop:28,display:"grid",gap:12}}>
+    <footer className="container" style={{padding:"28px 1rem",borderTop:"1px solid var(--border)",marginTop:28,display:"grid",gap:12}}>
       <div className="logo"><span className="dot"></span><b>Mira</b></div>
       <div className="navbar">
         <Link to="/" className="navbtn">Home</Link>

@@ -26,7 +26,7 @@ export default function MobileCatalog({ open, onClose }: { open: boolean; onClos
         </div>
         <nav style={{ display: "grid", gap: 8 }}>
           {(cats || []).map((l1: any) => (
-            <details key={l1.slug} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 8 }}>
+            <details key={l1.slug} style={{ padding: 8 }}>
               <summary style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                 <b>{l1.title}</b>
               </summary>
@@ -38,7 +38,7 @@ export default function MobileCatalog({ open, onClose }: { open: boolean; onClos
                     </summary>
                     <div style={{ padding: "6px 0 0 22px", display: "grid", gap: 6 }}>
                       {l2.children?.map((l3: any) => (
-                        <Link key={l3.slug} to={`/catalog/${l1.slug}/${l2.slug}/${l3.slug}`} className="navbtn" onClick={onClose}>
+                        <Link key={l3.slug} to={`/catalog/${l1.slug}/${l2.slug}/${l3.slug}`} className="navbtn bordered-none" onClick={onClose}>
                           {l3.title}
                         </Link>
                       ))}

@@ -66,6 +66,11 @@ html[data-theme="pink"]{
   }
 }
 
+.bordered-none {
+  border: 1px solid transparent;
+  border-radius: 0;
+}
+
 .search {
   display: flex;
   align-items: center;
