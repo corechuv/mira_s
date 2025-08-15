@@ -32,7 +32,7 @@ export default function Header(){
         </div>
 
         <form className="search" onSubmit={onSubmit}>
-          <input className="input" placeholder="Поиск товаров..." value={q} onChange={e=>setQ(e.target.value)} aria-label="Поиск"/>
+          <input className="input" placeholder="Search..." value={q} onChange={e=>setQ(e.target.value)} aria-label="Поиск"/>
           <button className="" type="submit"><Icon name="search"/></button>
         </form>
 

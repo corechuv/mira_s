@@ -14,15 +14,15 @@ export default function Home(){
           <h1 style={{fontSize:"2rem"}}>Шото написать</h1>
           <p style={{color:"var(--muted)"}}>Шото красиво дописать</p>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <Link to="/catalog" className="btn primary">Открыть каталог</Link>
-            <Link to="/search?q=помада" className="btn">Шото искать</Link>
+            <Link to="/catalog" className="btn primary">Catalog</Link>
+            <Link to="/search?q=шото" className="btn">Шото искать</Link>
           </div>
         </section>
       </Reveal>
       <section style={{display:"grid",gap:12}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <h2>Подборка дня</h2>
-          <Link to="/catalog" className="link">Смотреть всё →</Link>
+          <h2>Today's Picks</h2>
+          <Link to="/catalog" className="link">View All →</Link>
         </div>
         <div className="grid-products">
           {picks.map(p=> <ProductCard key={p.id} p={p}/>)}

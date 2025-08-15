@@ -9,11 +9,11 @@ export default function WishlistPage(){
   React.useEffect(()=>{ listProductsByIds(state.ids).then(setList).catch(console.error); },[state.ids.join(",")]);
   return (
     <div className="container" style={{display:"grid",gap:12}}>
-      <h1>Избранное</h1>
+      <h1>Wishlist</h1>
       <div className="grid-products">
         {list.map(p=> <ProductCard key={p.id} p={p}/>)}
       </div>
-      {!list.length && <p style={{color:"var(--muted)"}}>Пусто. Добавляйте товары на страницах каталога.</p>}
+      {!list.length && <p style={{color:"var(--muted)"}}>Your wishlist is empty. Add products from the catalog pages.</p>}
     </div>
   );
 }

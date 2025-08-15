@@ -9,8 +9,8 @@ export default function ComparePage(){
   React.useEffect(()=>{ listProductsByIds(state.ids).then(setList).catch(console.error); },[state.ids.join(",")]);
   return (
     <div className="container" style={{display:"grid",gap:12}}>
-      <h1>Сравнение</h1>
-      {!list.length && <p style={{color:"var(--muted)"}}>Добавьте товары в сравнение.</p>}
+      <h1>Compare</h1>
+      {!list.length && <p style={{color:"var(--muted)"}}>Add products to compare.</p>}
       {!!list.length && (
         <div className="card" style={{overflow:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -19,7 +19,7 @@ export default function ComparePage(){
             </thead>
             <tbody>
               <tr>{list.map((p:any)=><td key={p.id} style={{padding:12,borderBottom:"1px solid var(--border)"}}>{price(p.price)}</td>)}</tr>
-              <tr>{list.map((p:any)=><td key={p.id} style={{padding:12,borderBottom:"1px solid var(--border)"}}>Рейтинг: {p.rating}</td>)}</tr>
+              <tr>{list.map((p:any)=><td key={p.id} style={{padding:12,borderBottom:"1px solid var(--border)"}}><b>Rating:</b> {p.rating}</td>)}</tr>
               <tr>{list.map((p:any)=><td key={p.id} style={{padding:12,borderBottom:"1px solid var(--border)"}}>{Object.entries(p.attrs).map(([k,v]:any)=><div key={k}><b>{k}:</b> {v}</div>)}</td>)}</tr>
             </tbody>
           </table>

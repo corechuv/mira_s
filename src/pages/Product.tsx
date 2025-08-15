@@ -56,8 +56,8 @@ export default function ProductPage(){
     return ()=>{ isMounted = false; };
   },[slug]);
 
-  if(loading) return <div className="container"><div className="card" style={{padding:16}}>Загрузка…</div></div>;
-  if(!prod) return <div className="container"><div className="card" style={{padding:16}}>Товар не найден.</div></div>;
+  if(loading) return <div className="container"><div className="card" style={{padding:16}}>Loading…</div></div>;
+  if(!prod) return <div className="container"><div className="card" style={{padding:16}}>Product not found.</div></div>;
 
   const inWish = wish.state.ids.includes(prod.id);
   const inComp  = comp.state.ids.includes(prod.id);
@@ -86,7 +86,7 @@ export default function ProductPage(){
           {/* Галерея */}
           <div style={{display:"grid", gap:8}}>
             <div className="card" style={{padding:8, display:"grid", placeItems:"center", minHeight:300}}>
-              {imgs[0] ? <img src={imgs[0]} alt={prod.title} style={{maxWidth:"100%", borderRadius:16}}/> : <div className="muted">Нет изображения</div>}
+              {imgs[0] ? <img src={imgs[0]} alt={prod.title} style={{maxWidth:"100%", borderRadius:16}}/> : <div className="muted">No image</div>}
             </div>
             {imgs.length>1 && (
               <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
@@ -100,7 +100,7 @@ export default function ProductPage(){
             <h1 style={{margin:0}}>{prod.title}</h1>
             <div style={{display:"flex", alignItems:"center", gap:10}}>
               <div className="badge">{prod.rating.toFixed(1)} ★</div>
-              <small className="muted">({prod.rating_count} отзывов)</small>
+              <small className="muted">({prod.rating_count} reviews)</small>
             </div>
             <div style={{display:"flex", alignItems:"baseline", gap:10}}>
               <div className="price">{price(prod.price)}</div>
@@ -111,26 +111,26 @@ export default function ProductPage(){
             {/* ACTION BAR */}
             <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
               <button className="btn primary" onClick={addToCart}>
-                <Icon name="cart" /> <span style={{marginLeft:6}}>В корзину</span>
+                <Icon name="cart" /> <span style={{marginLeft:6}}>Add to Cart</span>
               </button>
 
-              <button className={"btn"+(inWish?" active":"")} onClick={toggleWish} title={inWish?"Убрать из избранного":"В избранное"}>
+              <button className={"btn"+(inWish?" active":"")} onClick={toggleWish} title={inWish?"Remove from Wishlist":"Add to Wishlist"}>
                 <Icon name="heart" />
-                <span style={{marginLeft:6}}>{inWish?"В избранном":"В избранное"}</span>
+                <span style={{marginLeft:6}}>{inWish?"In Wishlist":"Add to Wishlist"}</span>
               </button>
 
-              <button className={"btn"+(inComp?" active":"")} onClick={toggleCompare} title={inComp?"Убрать из сравнения":"В сравнение"}>
+              <button className={"btn"+(inComp?" active":"")} onClick={toggleCompare} title={inComp?"Remove from Compare":"Add to Compare"}>
                 <Icon name="scale" />
-                <span style={{marginLeft:6}}>{inComp?"В сравнении":"В сравнение"}</span>
+                <span style={{marginLeft:6}}>{inComp?"In Compare":"Add to Compare"}</span>
               </button>
 
-              <Link to="/compare" className="btn" title="Открыть сравнение">
-                <Icon name="arrow-right" /><span style={{marginLeft:6}}>Сравнить</span>
+              <Link to="/compare" className="btn" title="Open Compare">
+                <Icon name="arrow-right" /><span style={{marginLeft:6}}>Compare</span>
               </Link>
             </div>
 
             <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
-              <Link to="/catalog" className="btn">Вернуться в каталог</Link>
+              <Link to="/catalog" className="btn">Back to Catalog</Link>
             </div>
           </div>
         </div>

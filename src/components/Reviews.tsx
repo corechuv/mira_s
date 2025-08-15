@@ -54,16 +54,16 @@ export default function Reviews({ productId }:{ productId:string }){
     setBusy(true); setMsg("");
     try{
       await upsertMyReview(productId, rating, text.trim());
-      setMsg("Отзыв сохранён");
+      setMsg("Review saved");
       await loadAll();
-    }catch(e:any){ setMsg(e?.message || "Не удалось сохранить отзыв"); }
+    }catch(e:any){ setMsg(e?.message || "Failed to save review"); }
     setBusy(false);
   }
   async function remove(){
     if(!my) return;
     setBusy(true); setMsg("");
-    try{ await deleteMyReview(my.id); setMsg("Отзыв удалён"); await loadAll(); }
-    catch(e:any){ setMsg(e?.message || "Не удалось удалить"); }
+    try{ await deleteMyReview(my.id); setMsg("Review deleted"); await loadAll(); }
+    catch(e:any){ setMsg(e?.message || "Failed to delete review"); }
     setBusy(false);
   }
 
@@ -72,26 +72,26 @@ export default function Reviews({ productId }:{ productId:string }){
       <div style={{display:"flex", alignItems:"center", gap:12, flexWrap:"wrap"}}>
         <Stars value={Math.round(avg)} />
         <b>{avg.toFixed(1)}</b>
-        <span className="muted">({count} отзывов)</span>
+        <span className="muted">({count} reviews)</span>
       </div>
 
       {session ? (
         <div className="card" style={{padding:12, display:"grid", gap:10}}>
-          <div><b>{my ? "Ваш отзыв" : "Оставить отзыв"}</b></div>
+          <div><b>{my ? "Your Review" : "Leave a Review"}</b></div>
           <Stars value={rating} onChange={setRating} interactive size={24}/>
-          <textarea className="input" rows={4} placeholder="Поделитесь впечатлением о товаре…" value={text} onChange={e=>setText(e.target.value)} />
+          <textarea className="input" rows={4} placeholder="Share your thoughts about the product…" value={text} onChange={e=>setText(e.target.value)} />
           <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
-            <button className="btn primary" onClick={submit} disabled={busy}>{my? "Обновить":"Отправить"}</button>
-            {my && <button className="btn" onClick={remove} disabled={busy}>Удалить</button>}
+            <button className="btn primary" onClick={submit} disabled={busy}>{my? "Update":"Submit"}</button>
+            {my && <button className="btn" onClick={remove} disabled={busy}>Delete</button>}
             {msg && <small className="muted">{msg}</small>}
           </div>
         </div>
       ) : (
-        <div className="badge">Чтобы написать отзыв, войдите в аккаунт.</div>
+        <div className="badge">To leave a review, please log in.</div>
       )}
 
       <div style={{display:"grid", gap:8}}>
-        {!list.length && <p className="muted">Пока нет отзывов.</p>}
+        {!list.length && <p className="muted">No reviews yet.</p>}
         {list.map(r=>(
           <article key={r.id} className="card" style={{padding:12, display:"grid", gap:6}}>
             <div style={{display:"flex", alignItems:"center", gap:8, justifyContent:"space-between"}}>
@@ -100,7 +100,7 @@ export default function Reviews({ productId }:{ productId:string }){
                   {(r.full_name?.[0] || "☺").toUpperCase()}
                 </div>
                 <div>
-                  <div style={{fontWeight:600}}>{r.full_name || "Покупатель"}</div>
+                  <div style={{fontWeight:600}}>{r.full_name || "Customer"}</div>
                   <small className="muted">{new Date(r.created_at).toLocaleString()}</small>
                 </div>
               </div>

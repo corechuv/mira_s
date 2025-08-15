@@ -22,13 +22,13 @@ export default function Filters({ filters, onChange }:{ filters:FiltersState; on
   }
   return (
     <aside className="card" style={{padding:12}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Icon name="filter"/><b>Фильтры</b></div>
-      <label>Цена, от</label>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Icon name="filter"/><b>Filters</b></div>
+      <label>Price, from</label>
       <input className="input" type="number" value={filters.min ?? ""} onChange={e=>onChange({ ...filters, min: e.target.value ? Number(e.target.value) : undefined })}/>
-      <label>Цена, до</label>
+      <label>Price, to</label>
       <input className="input" type="number" value={filters.max ?? ""} onChange={e=>onChange({ ...filters, max: e.target.value ? Number(e.target.value) : undefined })}/>
       <div className="divider"></div>
-      <b>Атрибуты</b>
+      <b>Attributes</b>
       <div style={{display:"grid",gap:6,marginTop:6}}>
         {Object.entries(ATTR_OPTIONS).map(([k,vals])=>(
           <details key={k} open>
@@ -45,12 +45,12 @@ export default function Filters({ filters, onChange }:{ filters:FiltersState; on
         ))}
       </div>
       <div className="divider"></div>
-      <label>Сортировка</label>
+      <label>Sort by</label>
       <select className="select" value={filters.sort} onChange={e=>onChange({ ...filters, sort: e.target.value as any })}>
-        <option value="popular">По популярности</option>
-        <option value="price_asc">Сначала дешёвые</option>
-        <option value="price_desc">Сначала дорогие</option>
-        <option value="rating_desc">По рейтингу</option>
+        <option value="popular">Most Popular</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="rating_desc">Highest Rated</option>
       </select>
     </aside>
   );

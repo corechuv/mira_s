@@ -21,7 +21,7 @@ export default function MobileCatalog({ open, onClose }: { open: boolean; onClos
       <div className="backdrop" onClick={onClose} />
       <aside className="panel" role="menu" aria-label="Каталог">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div className="logo"><span className="dot"></span><span>Каталог</span></div>
+          <div className="logo"><span className="dot"></span><span>Catalog</span></div>
           <button className="btn-h icon" onClick={onClose}><Icon name="close" /></button>
         </div>
         <nav style={{ display: "grid", gap: 8 }}>

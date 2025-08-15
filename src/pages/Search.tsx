@@ -16,15 +16,15 @@ export default function SearchPage() {
   React.useEffect(() => { listProducts({ q, limit: 40 }).then(setFound).catch(console.error); }, [q]);
   return (
     <div className="container" style={{ display: "grid", gap: 12 }}>
-      <h1>Поиск: “{q}”</h1>
+      <h1>Search: “{q}”</h1>
       <form className="search" onSubmit={onSubmit}>
-        <input className="input" placeholder="Поиск товаров..." value={searchQ} onChange={e => setQ(e.target.value)} aria-label="Поиск" />
+        <input className="input" placeholder="Search..." value={searchQ} onChange={e => setQ(e.target.value)} aria-label="Search" />
         <button className="" type="submit"><Icon name="search" /></button>
       </form>
       <div className="grid-products">
         {found.map(p => <ProductCard key={p.id} p={p} />)}
       </div>
-      {!found.length && <p style={{ color: "var(--muted)" }}>Ничего не найдено.</p>}
+      {!found.length && <p style={{ color: "var(--muted)" }}>No results found.</p>}
     </div>
   );
 }

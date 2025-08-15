@@ -10,10 +10,10 @@ export default function CartPage(){
 
   return (
     <div className="container" style={{display:"grid",gap:16}}>
-      <h1>Корзина</h1>
+      <h1>Cart</h1>
       {!state.lines.length && <div className="card" style={{padding:16}}>
-        <p>Корзина пуста.</p>
-        <div style={{marginTop:8}}><Link className="btn" to="/catalog">В каталог</Link></div>
+        <p>Cart is empty.</p>
+        <div style={{marginTop:8}}><Link className="btn" to="/catalog">Go to Catalog</Link></div>
       </div>}
       {!!state.lines.length && (
         <div className="grid" style={{gridTemplateColumns:"1fr 360px", gap:16}}>
@@ -33,10 +33,10 @@ export default function CartPage(){
             ))}
           </div>
           <aside className="card" style={{padding:16,display:"grid",gap:8,height:"fit-content"}}>
-            <h2>Итого</h2>
+            <h2>Total</h2>
             <div><b>{price(total)}</b></div>
-            <button className="btn primary" onClick={()=>push("/checkout")}>Перейти к оформлению</button>
-            <button className="btn ghost" onClick={()=>dispatch({type:"clear"})}>Очистить корзину</button>
+            <button className="btn primary" onClick={()=>push("/checkout")}>Proceed to Checkout</button>
+            <button className="btn ghost" onClick={()=>dispatch({type:"clear"})}>Clear Cart</button>
           </aside>
         </div>
       )}

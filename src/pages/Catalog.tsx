@@ -43,18 +43,18 @@ export default function CatalogPage(){
         <Reveal anim="slide-left"><div><Filters filters={filters} onChange={setFilters}/></div></Reveal>
         <div style={{display:"grid",gap:12}}>
           <Reveal><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <h1 style={{textTransform:"capitalize"}}>{levels.join(" / ") || "Каталог"}</h1>
+            <h1 style={{textTransform:"capitalize"}}>{levels.join(" / ") || "Catalog"}</h1>
             <div className="navbar">
-              <Link to="/catalog" className="navbtn">Все</Link>
-              <Link to="/catalog/ukhod" className="navbtn">Уход</Link>
-              <Link to="/catalog/makiyazh" className="navbtn">Макияж</Link>
-              <Link to="/catalog/volosy" className="navbtn">Волосы</Link>
+              <Link to="/catalog" className="navbtn">All</Link>
+              <Link to="/catalog/ukhod" className="navbtn">Care</Link>
+              <Link to="/catalog/makiyazh" className="navbtn">Makeup</Link>
+              <Link to="/catalog/volosy" className="navbtn">Hair</Link>
             </div>
           </div></Reveal>
           <div className="grid-products">
             {list.map(p=> <ProductCard key={p.id} p={p}/>)}
           </div>
-          {!list.length && <p style={{color:"var(--muted)"}}>Ничего не найдено под текущие фильтры.</p>}
+          {!list.length && <p style={{color:"var(--muted)"}}>Nothing found for the current filters.</p>}
         </div>
       </div>
     </div>
