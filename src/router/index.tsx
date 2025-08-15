@@ -1,3 +1,4 @@
+// src/router.tsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type Route = {
@@ -13,6 +14,22 @@ function normalize(pathname:string){
   let p = pOnly.startsWith("/") ? pOnly : "/"+pOnly;
   p = p.replace(/\/+$/,"");
   return p || "/";
+}
+
+/* >>> Добавили два helper'а для нормализации в hash-роутинг <<< */
+function toHashHref(to:string){
+  // принимает "/admin", "admin", "#/admin" и т.п. -> вернёт "#/admin"
+  let t = (to||"").trim();
+  if (t.startsWith("#")) t = t.slice(1);
+  if (!t.startsWith("/")) t = "/"+t;
+  return "#"+t;
+}
+function toHashValue(to:string){
+  // то, что кладём в location.hash (без '#')
+  let t = (to||"").trim();
+  if (t.startsWith("#")) t = t.slice(1);
+  if (!t.startsWith("/")) t = "/"+t;
+  return t;
 }
 
 function pathToRegex(path:string){
@@ -51,10 +68,12 @@ type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   to: string;
   children: React.ReactNode;
 };
+
+/* >>> ИСПРАВЛЁННЫЙ Link: всегда даёт href вида "#/..." <<< */
 export function Link({ to, children, className, onClick, ...rest }: LinkProps){
   return (
     <a
-      href={"#"+to}
+      href={toHashHref(to)}
       className={className}
       onClick={(e)=>{ onClick?.(e); }}
       {...rest}
@@ -88,7 +107,8 @@ export function Router({ routes }:{ routes: Route[] }){
     return null;
   },[pathname, routes]);
 
-  const ctx:RouterCtx = { pathname, search, params: match?.params ?? {}, push: (to)=> location.hash = to };
+  /* >>> ИСПРАВЛЁННЫЙ push: принимает "/admin", "admin", "#/admin" <<< */
+  const ctx:RouterCtx = { pathname, search, params: match?.params ?? {}, push: (to)=> { location.hash = toHashValue(to); } };
 
   return (
     <RouterContext.Provider value={ctx}>
