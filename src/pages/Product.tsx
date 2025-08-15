@@ -3,6 +3,7 @@ import { useRouter, Link } from "../router";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { price } from "../utils/money";
 import { supabase } from "../api/supabase";
+import { imageUrl } from "../api/images";
 import Reviews from "../components/Reviews";
 import { Icon } from "../icons/Icon";
 import { useCart, useWishlist, useCompare } from "../store/store";
@@ -36,20 +37,46 @@ export default function ProductPage(){
     let isMounted = true;
     (async ()=>{
       setLoading(true);
-      const { data: p } = await supabase
+
+      // 1) сам товар
+      const { data: p, error: pe } = await supabase
         .from("products")
         .select("id,slug,title,price,old_price,rating,rating_count,short,brand,category_l1,category_l2,category_l3")
         .eq("slug", slug)
         .maybeSingle();
-      const { data: pi } = await supabase
+
+      if (pe) console.error(pe);
+      if (!p) {
+        if (isMounted){ setProd(null); setImgs([]); setLoading(false); }
+        return;
+      }
+
+      // 2) изображения: строго select -> filters -> order
+      let piRes = await supabase
         .from("product_images")
-        .select("url, sort, product_id")
-        .in("product_id", p?.id ? [p.id] : ["00000000-0000-0000-0000-000000000000"])
+        .select("path,url,sort")
+        .eq("product_id", p.id)
         .order("sort", { ascending: true });
 
+      // фоллбек, если столбца path нет в кэше схемы
+      if (piRes.error && (piRes.error.code === "42703" || /column .*path/i.test(String(piRes.error.message)))) {
+        piRes = await supabase
+          .from("product_images")
+          .select("url,sort")
+          .eq("product_id", p.id)
+          .order("sort", { ascending: true });
+      }
+      if (piRes.error) console.error(piRes.error);
+
+      const rows: Array<{path?:string|null; url?:string|null; sort?:number|null}> = (piRes.data as any[]) || [];
+      const images = rows
+        .sort((a,b)=> (a.sort??0)-(b.sort??0))
+        .map(r => imageUrl(r.path || r.url))
+        .filter(Boolean);
+
       if (isMounted){
-        setProd(p as any || null);
-        setImgs((pi||[]).map(x=>x.url));
+        setProd(p as any);
+        setImgs(images);
         setLoading(false);
       }
     })();
@@ -63,7 +90,7 @@ export default function ProductPage(){
   const inComp  = comp.state.ids.includes(prod.id);
 
   function addToCart(){
-    // Собираем именно тот объект, что ждёт твой cartReducer (ProductUI)
+    // cartReducer ждёт ProductUI
     const productUI:any = { id: prod.id, price: prod.price, title: prod.title, slug: prod.slug, images: imgs };
     cart.dispatch({ type:"add", product: productUI, qty: 1 });
   }
@@ -86,11 +113,16 @@ export default function ProductPage(){
           {/* Галерея */}
           <div style={{display:"grid", gap:8}}>
             <div className="card" style={{padding:8, display:"grid", placeItems:"center", minHeight:300}}>
-              {imgs[0] ? <img src={imgs[0]} alt={prod.title} style={{maxWidth:"100%", borderRadius:16}}/> : <div className="muted">No image</div>}
+              {imgs[0]
+                ? <img src={imgs[0]} alt={prod.title} loading="lazy" style={{maxWidth:"100%", borderRadius:16}}/>
+                : <div className="muted">No image</div>
+              }
             </div>
             {imgs.length>1 && (
               <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
-                {imgs.slice(1).map((u,i)=>(<img key={i} src={u} style={{width:72, height:72, objectFit:"cover", borderRadius:12}}/>))}
+                {imgs.slice(1).map((u,i)=>(
+                  <img key={i} src={u} loading="lazy" style={{width:72, height:72, objectFit:"cover", borderRadius:12}}/>
+                ))}
               </div>
             )}
           </div>

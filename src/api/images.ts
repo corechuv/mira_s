@@ -1,18 +1,29 @@
 import { supabase } from "./supabase";
 
-/** Возвращает абсолютный URL для картинки.
- *  Принимает: полный URL или path из бакета product-images.
+/** Возвращает абсолютный URL картинки.
+ * Принимает:
+ *  - полный http(s) URL,
+ *  - server-relative '/storage/v1/object/public/product-images/<key>',
+ *  - просто ключ '<key>'.
  */
 export function imageUrl(pathOrUrl: string | null | undefined): string {
-  const v = (pathOrUrl || "").trim();
-  if (!v) return "";
-  if (/^https?:\/\//i.test(v)) return v;
-  const { data } = supabase.storage.from("product-images").getPublicUrl(v);
-  return data?.publicUrl || `/storage/v1/object/public/product-images/${v}`;
+  const raw = (pathOrUrl || "").trim();
+  if (!raw) return "";
+
+  // 1) Готовый абсолютный URL — отдаём как есть
+  if (/^https?:\/\//i.test(raw)) return raw;
+
+  // 2) Уже server-relative путь из Storage — достанем ключ
+  // допускаем и без начального слэша: 'storage/v1/object/public/product-images/...'
+  const m = raw.match(/^(?:https?:\/\/[^/]+)?\/?storage\/v1\/object\/public\/product-images\/(.+)$/i);
+  const key = m ? m[1] : raw.replace(/^\/+/, ""); // иначе это и есть ключ
+
+  // 3) Строим правильный публичный URL один раз
+  const { data } = supabase.storage.from("product-images").getPublicUrl(key);
+  return data?.publicUrl || `/storage/v1/object/public/product-images/${key}`;
 }
 
-/** Если хочешь, можно явный публичный URL по path */
-export function publicImageUrl(path: string): string {
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+export function publicImageUrl(key: string): string {
+  const { data } = supabase.storage.from("product-images").getPublicUrl(key);
   return data.publicUrl;
 }

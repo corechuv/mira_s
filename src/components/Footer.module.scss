@@ -1,0 +1,66 @@
+
+.methods {
+    display: flex;
+    gap: 50px;
+    align-items: center;
+    padding: 20px 0;
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    a img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+    }
+}
+
+.delivery {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 20px 0;
+
+    a img {
+        width: 70px;
+        height: 50px;
+        object-fit: contain;
+    }
+}
+
+.social {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 20px 0;
+
+    &__icon {
+
+        &--meta {
+            width: 80px;
+            height: 40px;
+            object-fit: contain;
+            background-color: var(--meta-color);
+        }
+        &--instagram {
+            width: 30px;
+            height: 40px;
+            object-fit: contain;
+            background-color: var(--instagram-color);
+        }
+        &--tiktok {
+            width: 70px;
+            height: 40px;
+            object-fit: contain;
+            background-color: var(--tiktok-color);
+        }
+        &--youtube {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+            background-color: var(--youtube-color);
+        }
+    }
+}
