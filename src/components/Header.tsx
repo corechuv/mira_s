@@ -1,10 +1,11 @@
 import React from "react";
 import { Icon } from "../icons/Icon";
 import { Link, useRouter } from "../router";
-import ThemeToggle from "./ThemeToggle";
 import { useCart, useSearch } from "../store/store";
 import MobileCatalog from "./MobileCatalog";
 import { useScrollY } from "../utils/hooks";
+
+import logo from '../assets/MIRA_transparent.png'
 
 export default function Header(){
   const { push } = useRouter();
@@ -19,23 +20,28 @@ export default function Header(){
 
   return (
     <header className={`header ${scrolled ? "is-scrolled":""}`}>
-      <div className="container row">
-        <button className="btn" aria-label="Каталог" onClick={onCatalogClick}>
-          <Icon name="category"/> Каталог
+      <div className="container row" style={{justifyContent: isMobile ? "space-between" : "flex-start", padding: "1rem"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+
+        <button className="btn-h" aria-label="Каталог" onClick={onCatalogClick}>
+          <Icon name="category"/>
         </button>
-        <Link to="/" className="logo"><span className="dot"></span><span>Marketplace</span></Link>
+        <Link to="/" className="logo">
+          <img src={logo} alt="Mira" className="logo-image" />
+        </Link>
+        </div>
 
         <form className="search" onSubmit={onSubmit}>
           <input className="input" placeholder="Поиск товаров..." value={q} onChange={e=>setQ(e.target.value)} aria-label="Поиск"/>
-          <button className="btn" type="submit"><Icon name="search"/> Найти</button>
+          <button className="" type="submit"><Icon name="search"/></button>
         </form>
 
         <nav className="actions">
-          <Link to="/wishlist" className="btn icon" aria-label="Избранное"><Icon name="heart"/></Link>
-          <Link to="/compare" className="btn icon" aria-label="Сравнение"><Icon name="compare"/></Link>
-          <Link to="/cart" className="btn" aria-label="Корзина"><Icon name="cart"/> <span className="badge">{state.lines.length}</span></Link>
-          <Link to="/account" className="btn icon" aria-label="Аккаунт"><Icon name="user"/></Link>
-          <ThemeToggle/>
+          <Link to="/search" className="search-header btn-h" aria-label="Search"><Icon name="search"/></Link>
+          <Link to="/wishlist" className="btn-h" aria-label="Избранное"><Icon name="heart"/></Link>
+          <Link to="/compare" className="btn-h" aria-label="Сравнение"><Icon name="compare"/></Link>
+          <Link to="/cart" className="btn-h header-cart-btn" aria-label="Корзина"><Icon name="cart"/> <span className="badge">{state.lines.length}</span></Link>
+          <Link to="/account" className="btn-h" aria-label="Аккаунт"><Icon name="user"/></Link>
         </nav>
       </div>
       <MobileCatalog open={open} onClose={()=>setOpen(false)}/>

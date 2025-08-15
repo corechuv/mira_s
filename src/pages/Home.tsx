@@ -11,11 +11,11 @@ export default function Home(){
     <div className="container" style={{display:"grid",gap:16}}>
       <Reveal anim="fade-up">
         <section className="card" style={{padding:24,display:"grid",gap:12}}>
-          <h1 style={{fontSize:"2rem"}}>Маркетплейс косметики • Pink / Black / White</h1>
-          <p style={{color:"var(--muted)"}}>Профессиональная косметика и уход: адаптивный UI, 3-уровневый каталог, фильтры, корзина, избранное, сравнение. Готов к подключению бекенда.</p>
+          <h1 style={{fontSize:"2rem"}}>Шото написать</h1>
+          <p style={{color:"var(--muted)"}}>Шото красиво дописать</p>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <Link to="/catalog" className="btn primary">Открыть каталог</Link>
-            <Link to="/search?q=помада" className="btn">Искать помаду</Link>
+            <Link to="/search?q=помада" className="btn">Шото искать</Link>
           </div>
         </section>
       </Reveal>

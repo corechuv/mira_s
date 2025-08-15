@@ -4,7 +4,7 @@ type IconName =
   | "menu" | "close" | "search" | "cart" | "user" | "heart" | "compare"
   | "sun" | "moon" | "pink" | "category" | "filter" | "sort" | "star" | "trash" | "chevron-right" | "chevron-down" | "home";
 
-export function Icon({ name, size = 20, stroke = 2 }: { name: IconName; size?: number; stroke?: number }) {
+export function Icon({ name, size = 18, stroke = 1.5 }: { name: IconName; size?: number; stroke?: number }) {
   const s = { width: size, height: size, strokeWidth: stroke, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" } as any;
   switch (name) {
     case "menu": return <svg {...s} viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor"/></svg>;
