@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-/** Строка таблицы categories (схема из SQL-патчей) */
+/** Строка таблицы categories */
 export type CategoryRow = {
   id: string;
   name: string;
@@ -17,7 +17,7 @@ export type CategoryRow = {
 /** Узел дерева категорий */
 export type CategoryNode = CategoryRow & { children: CategoryNode[] };
 
-/** Плоский список категорий (отсортирован: sort, name, full_path) */
+/** Плоский список категорий */
 export async function listCategoriesFlat(): Promise<CategoryRow[]> {
   const { data, error } = await supabase
     .from("categories")
@@ -32,7 +32,6 @@ export async function listCategoriesFlat(): Promise<CategoryRow[]> {
 
 /** Построение дерева из плоского списка */
 function buildTree(rows: CategoryRow[]): CategoryNode[] {
-  // Сортируем по глубине, чтобы родитель всегда шёл раньше ребёнка
   const sorted = [...rows].sort((a, b) => {
     if (a.depth !== b.depth) return a.depth - b.depth;
     if (a.sort !== b.sort) return a.sort - b.sort;
@@ -45,26 +44,17 @@ function buildTree(rows: CategoryRow[]): CategoryNode[] {
   for (const r of sorted) {
     const node: CategoryNode = { ...r, children: [] };
     map.set(r.id, node);
-
     if (!r.parent_id) {
       roots.push(node);
     } else {
       const parent = map.get(r.parent_id);
-      if (parent) {
-        parent.children.push(node);
-      } else {
-        // на всякий случай: если по каким-то причинам родителя ещё нет
-        roots.push(node);
-      }
+      if (parent) parent.children.push(node);
+      else roots.push(node); // защита, если вдруг нет родителя в выборке
     }
   }
 
-  // В дочерних узлах поддержим сортировку
   const sortChildren = (n: CategoryNode) => {
-    n.children.sort((a, b) => {
-      if (a.sort !== b.sort) return a.sort - b.sort;
-      return a.name.localeCompare(b.name);
-    });
+    n.children.sort((a, b) => (a.sort - b.sort) || a.name.localeCompare(b.name));
     n.children.forEach(sortChildren);
   };
   roots.forEach(sortChildren);
@@ -72,13 +62,13 @@ function buildTree(rows: CategoryRow[]): CategoryNode[] {
   return roots;
 }
 
-/** Дерево категорий (корни + рекурсивные children) */
+/** Дерево категорий */
 export async function listCategoriesTree(): Promise<CategoryNode[]> {
   const flat = await listCategoriesFlat();
   return buildTree(flat);
 }
 
-/** Найти категорию по full_path (например "make-up/lips/lipstick") */
+/** Найти категорию по full_path */
 export async function getCategoryByFullPath(full_path: string): Promise<CategoryRow | null> {
   const { data, error } = await supabase
     .from("categories")
@@ -90,7 +80,49 @@ export async function getCategoryByFullPath(full_path: string): Promise<Category
   return (data as CategoryRow) ?? null;
 }
 
-/** Получить предков категории (breadcrumbs) — через split full_path локально */
+/** АЛИАС для совместимости с существующим кодом */
+export async function getCategoryByPath(path: string): Promise<CategoryRow | null> {
+  return getCategoryByFullPath(path);
+}
+
+/** Дети категории по full_path; если path пустой — корни */
+export async function listChildrenByPath(path?: string): Promise<CategoryRow[]> {
+  // Корневые категории
+  if (!path || path === "/" || path === "#") {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("id,name,title,slug,parent_id,full_path,depth,level,sort,created_at")
+      .is("parent_id", null)
+      .order("sort", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+    return (data ?? []) as CategoryRow[];
+  }
+
+  // Находим родителя по full_path
+  const { data: parent, error: e1 } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("full_path", path)
+    .maybeSingle();
+
+  if (e1) throw e1;
+  if (!parent?.id) return [];
+
+  // Достаём детей по parent_id
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id,name,title,slug,parent_id,full_path,depth,level,sort,created_at")
+    .eq("parent_id", parent.id)
+    .order("sort", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []) as CategoryRow[];
+}
+
+/** Хлебные крошки из full_path (локально по плоскому списку) */
 export function buildBreadcrumbsFromPath(full_path: string, all?: CategoryRow[]) {
   if (!all) return [];
   const byPath = new Map(all.map(r => [r.full_path, r]));
@@ -104,8 +136,10 @@ export function buildBreadcrumbsFromPath(full_path: string, all?: CategoryRow[])
   return crumbs;
 }
 
-/** Создать/обновить категорию (для админки) */
-export async function upsertCategory(input: Partial<CategoryRow> & { name?: string; title?: string; slug?: string; parent_id?: string | null; sort?: number }) {
+/** Upsert категории (для админки) */
+export async function upsertCategory(input: Partial<CategoryRow> & {
+  name?: string; title?: string; slug?: string; parent_id?: string | null; sort?: number;
+}) {
   const payload = {
     id: input.id,
     name: input.name ?? null,
@@ -125,8 +159,13 @@ export async function upsertCategory(input: Partial<CategoryRow> & { name?: stri
   return data as CategoryRow;
 }
 
-/** Удалить категорию по id (требуется политика admin write) */
+/** Удалить категорию */
 export async function deleteCategory(id: string) {
   const { error } = await supabase.from("categories").delete().eq("id", id);
   if (error) throw error;
+}
+
+/** Корневые категории (алиас для совместимости с Catalog.tsx) */
+export async function listRootCategories(): Promise<CategoryRow[]> {
+  return listChildrenByPath(); // undefined => parent_id IS NULL
 }
