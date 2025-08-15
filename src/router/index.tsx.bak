@@ -1,4 +1,4 @@
-// patched: hash-router with robust normalization
+// src/router.tsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type Route = {
@@ -9,20 +9,23 @@ export type Route = {
 type Match = { params: Record<string,string>, pathname: string };
 
 function normalize(pathname:string){
+  // отрезаем ?query, приводим к виду "/foo/bar" без хвостовых слэшей
   const pOnly = pathname.split("?")[0] || "/";
   let p = pOnly.startsWith("/") ? pOnly : "/"+pOnly;
   p = p.replace(/\/+$/,"");
   return p || "/";
 }
 
-// helpers to normalize any target to hash URL
+/* >>> Добавили два helper'а для нормализации в hash-роутинг <<< */
 function toHashHref(to:string){
+  // принимает "/admin", "admin", "#/admin" и т.п. -> вернёт "#/admin"
   let t = (to||"").trim();
   if (t.startsWith("#")) t = t.slice(1);
   if (!t.startsWith("/")) t = "/"+t;
   return "#"+t;
 }
 function toHashValue(to:string){
+  // то, что кладём в location.hash (без '#')
   let t = (to||"").trim();
   if (t.startsWith("#")) t = t.slice(1);
   if (!t.startsWith("/")) t = "/"+t;
@@ -30,9 +33,11 @@ function toHashValue(to:string){
 }
 
 function pathToRegex(path:string){
+  // поддержка :params и простого "*" (например "/*")
   const keys:string[]=[];
   let p = path.replace(/\/+$/,"") || "/";
   p = p.replace(/:[^/]+/g,(m)=>{ keys.push(m.slice(1)); return "([^/]+)"; });
+  // очень простой wildcard: "*" -> ".*"
   p = p.replace(/\*/g,".*");
   const regex = new RegExp("^"+p+"$");
   return { regex, keys };
@@ -50,9 +55,9 @@ export function matchPath(pathname:string, path:string): Match | null {
 }
 
 type RouterCtx = {
-  pathname: string;
-  search: string;
-  push: (to:string)=>void;
+  pathname: string;             // "/catalog/.."
+  search: string;               // "q=..." без '?'
+  push: (to:string)=>void;      // push("/search?q=...")
   params: Record<string,string>;
 };
 
@@ -64,6 +69,7 @@ type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   children: React.ReactNode;
 };
 
+/* >>> ИСПРАВЛЁННЫЙ Link: всегда даёт href вида "#/..." <<< */
 export function Link({ to, children, className, onClick, ...rest }: LinkProps){
   return (
     <a
@@ -76,6 +82,7 @@ export function Link({ to, children, className, onClick, ...rest }: LinkProps){
 }
 
 function getHashFull(){
+  // "#/path?query" -> "/path?query"
   const raw = location.hash.replace(/^#/,"");
   return raw || "/";
 }
@@ -100,10 +107,8 @@ export function Router({ routes }:{ routes: Route[] }){
     return null;
   },[pathname, routes]);
 
-  const ctx:RouterCtx = {
-    pathname, search, params: match?.params ?? {},
-    push: (to)=> { location.hash = toHashValue(to); }
-  };
+  /* >>> ИСПРАВЛЁННЫЙ push: принимает "/admin", "admin", "#/admin" <<< */
+  const ctx:RouterCtx = { pathname, search, params: match?.params ?? {}, push: (to)=> { location.hash = toHashValue(to); } };
 
   return (
     <RouterContext.Provider value={ctx}>

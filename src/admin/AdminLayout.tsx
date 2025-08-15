@@ -1,40 +1,67 @@
 import React from "react";
-import { Link, useRouter } from "../router";
+import { Link } from "../router";
 import { useAuth } from "../store/auth";
 import { supabase } from "../api/supabase";
 
-function useIsAdmin(){
-  const { session } = useAuth();
-  const [admin, setAdmin] = React.useState(false);
-  React.useEffect(()=>{
-    let active = true;
-    (async ()=>{
-      if (!session?.user?.id){ setAdmin(false); return; }
-      const { data } = await supabase.from("profiles").select("is_admin").eq("id", session.user.id).maybeSingle();
-      if(active) setAdmin(!!data?.is_admin);
-    })();
-    return ()=>{ active = false; };
-  },[session?.user?.id]);
-  return admin;
+type Status = "loading" | "guest" | "user" | "admin";
+
+async function fetchIsAdmin(userId:string){
+  const { data, error } = await supabase.from("profiles").select("is_admin").eq("id", userId).maybeSingle();
+  if (error) throw error;
+  return !!data?.is_admin;
 }
 
 export default function AdminLayout({ children }:{ children?:React.ReactNode }){
-  const isAdmin = useIsAdmin();
-  const { push } = useRouter();
+  const { session } = useAuth();
+  const [status, setStatus] = React.useState<Status>("loading");
 
   React.useEffect(()=>{
-    // не админов уводим на главную
-    if (isAdmin === false) push("/");
-  },[isAdmin]);
+    let cancelled = false;
+    (async ()=>{
+      if (!session || !session.user?.id){ setStatus("guest"); return; }
+      try{
+        const ok = await fetchIsAdmin(session.user.id);
+        if(!cancelled) setStatus(ok ? "admin" : "user");
+      }catch{
+        if(!cancelled) setStatus("user");
+      }
+    })();
+    return ()=>{ cancelled = true; };
+  },[session?.user?.id]);
 
-  if (!isAdmin) {
+  if (status === "loading"){
+    return <div className="container"><div className="card" style={{padding:16}}>Загрузка…</div></div>;
+  }
+  if (status === "guest"){
     return (
       <div className="container">
-        <div className="card" style={{padding:16}}>Загрузка… или нет прав</div>
+        <div className="card" style={{padding:16, display:"grid", gap:8}}>
+          <h2>Нужен вход</h2>
+          <div className="muted">Для доступа в админ-панель войдите в аккаунт с правами администратора.</div>
+          <div style={{display:"flex", gap:8}}>
+            <Link to="/account" className="btn primary">Войти</Link>
+            <Link to="/" className="btn">На главную</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (status === "user"){
+    return (
+      <div className="container">
+        <div className="card" style={{padding:16, display:"grid", gap:8}}>
+          <h2>Нет прав</h2>
+          <div className="muted">У этого аккаунта нет доступа к админке.</div>
+          <div style={{display:"flex", gap:8}}>
+            <Link to="/" className="btn">На главную</Link>
+            <Link to="/account" className="btn">Сменить аккаунт</Link>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // status === "admin"
   return (
     <div className="container" style={{display:"grid", gap:16}}>
       <div className="card" style={{padding:12, display:"flex", gap:8, alignItems:"center", flexWrap:"wrap"}}>

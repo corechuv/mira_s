@@ -24,7 +24,6 @@ import AdminSettings from "../admin/pages/Settings";
 
 export default function App() {
   const routes: Route[] = [
-
     { path: "/", element: <Home /> },
     { path: "/catalog", element: <Catalog /> },
     { path: "/catalog/:lvl1", element: <Catalog /> },
@@ -39,16 +38,14 @@ export default function App() {
     { path: "/account", element: <Account /> },
     { path: "/auth-debug", element: <AuthDebug /> },
     { path: "/about", element: <div className="container"><h1>О нас</h1><p>Контент-заглушка.</p></div> },
-    
-    
+    { path: "/*", element: <NotFound /> },
+
     { path: "/admin", element: <AdminDashboard /> },
     { path: "/admin/products", element: <AdminProducts /> },
     { path: "/admin/catalog", element: <AdminCatalog /> },
     { path: "/admin/reviews", element: <AdminReviews /> },
     { path: "/admin/users", element: <AdminUsers /> },
     { path: "/admin/settings", element: <AdminSettings /> },
-    
-    { path: "/*", element: <NotFound /> },
 
   ];
   return (
